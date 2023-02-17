@@ -1,16 +1,17 @@
-import * as fs from 'node:fs/promises';
-const apis: string[] = [];
-try {
-  const files = await fs.readdir('./mock');
-  for (const filePath of files) {
-    findAPIByFile(filePath);
-  }
-} catch (err) {
-  console.log(err);
+import { readdirSync, readFileSync } from 'node:fs';
+const apis = new Set();
+
+// 路径优化
+const filePaths = await readdirSync('../../project/慧客助手/hk-sso/src');
+for (const filePath of filePaths) {
+  findAPIByFile(filePath);
 }
-async function findAPIByFile(path: string) {
-  const re = /\/api(\/\w+)+/;
-  const fileContent = await fs.readFile(`./mock/${path}`, { encoding: 'utf8' });
+
+function findAPIByFile(path: string) {
+  console.log(path);
+  const re = /\/api(\/(\w+)-?(\w+))+/;
+  // 存在bug 如何path 不是文件而是目录则会保存
+  const fileContent = readFileSync(`../../project/慧客助手/hk-sso/src/${path}`, { encoding: 'utf8' });
   const lines = fileContent
     .split('\n')
     .map((item) => {
@@ -21,5 +22,8 @@ async function findAPIByFile(path: string) {
       }
     })
     .filter((item) => item);
-  console.log(lines);
+  lines.forEach((str) => {
+    apis.add(str);
+  });
 }
+console.log(apis);
